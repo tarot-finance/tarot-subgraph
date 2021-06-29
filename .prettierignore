@@ -4,4 +4,6 @@ src/types/
 .DS_STORE
 yarn-error.log
 .env
-scratch/
+.env.example
+scratch
+node_modules/
