@@ -1,4 +1,4 @@
-specVersion: 0.0.1
+specVersion: 0.0.2
 repository: https://github.com/tarot-finance/tarot-subgraph
 schema:
   file: ./schema.graphql
@@ -7,7 +7,7 @@ dataSources:
     name: TarotFactory
     network: fantom
     source:
-      address: "0x35C052bBf8338b06351782A565aa9AaD173432eA"
+      address: "0x35c052bbf8338b06351782a565aa9aad173432ea"
       abi: TarotFactory
       startBlock: 9926326
     mapping:
