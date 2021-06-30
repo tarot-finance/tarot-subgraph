@@ -1,0 +1,195 @@
+specVersion: 0.0.1
+repository: https://github.com/tarot-finance/tarot-subgraph
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: TarotFactory
+    network: {{network}}
+    source:
+      address: "{{tarotFactory}}"
+      abi: TarotFactory
+      startBlock: {{tarotFactoryStartBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/tarotFactory.ts
+      entities:
+        - TarotFactory
+      abis:
+        - name: TarotFactory
+          file: ./abis/TarotFactory.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: ERC20SymbolBytes
+          file: ./abis/ERC20SymbolBytes.json
+        - name: ERC20NameBytes
+          file: ./abis/ERC20NameBytes.json
+        - name: UniswapFactory
+          file: ./abis/UniswapFactory.json
+        - name: UniswapRouter
+          file: ./abis/UniswapRouter.json
+        - name: Pair
+          file: ./abis/Pair.json
+        - name: FarmingPool
+          file: ./abis/FarmingPool.json
+        - name: Distributor
+          file: ./abis/Distributor.json
+        - name: Collateral
+          file: ./abis/Collateral.json
+        - name: Borrowable
+          file: ./abis/Borrowable.json
+        - name: VaultToken
+          file: ./abis/VaultToken.json
+      eventHandlers:
+        - event: LendingPoolInitialized(indexed address,indexed address,indexed address,address,address,address,uint256)
+          handler: handleLendingPoolInitialized
+templates:
+  - kind: ethereum/contract
+    name: Pair
+    network: {{network}}
+    source:
+      abi: Pair
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/uniswapPair.ts
+      entities:
+        - Pair
+        - Token
+      abis:
+        - name: Pair
+          file: ./abis/Pair.json
+        - name: UniswapFactory
+          file: ./abis/UniswapFactory.json
+        - name: UniswapRouter
+          file: ./abis/UniswapRouter.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: ERC20SymbolBytes
+          file: ./abis/ERC20SymbolBytes.json
+        - name: ERC20NameBytes
+          file: ./abis/ERC20NameBytes.json
+        - name: PoolToken
+          file: ./abis/PoolToken.json
+      eventHandlers:
+        - event: Sync(uint112,uint112)
+          handler: handleSync1
+  - kind: ethereum/contract
+    name: Collateral
+    network: {{network}}
+    source:
+      abi: Collateral
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/collateral.ts
+      entities:
+        - Collateral
+      abis:
+        - name: Collateral
+          file: ./abis/Collateral.json
+      eventHandlers:
+        - event: Sync(uint256)
+          handler: handleSync
+        - event: NewSafetyMargin(uint256)
+          handler: handleNewSafetyMargin
+        - event: NewLiquidationIncentive(uint256)
+          handler: handleNewLiquidationIncentive
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+  - kind: ethereum/contract
+    name: Borrowable
+    network: {{network}}
+    source:
+      abi: Borrowable
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/borrowable.ts
+      entities:
+        - Borrowable
+      abis:
+        - name: Borrowable
+          file: ./abis/Borrowable.json
+        - name: FarmingPool
+          file: ./abis/FarmingPool.json
+        - name: Distributor
+          file: ./abis/Distributor.json
+      eventHandlers:
+        - event: Sync(uint256)
+          handler: handleSync
+        - event: AccrueInterest(uint256,uint256,uint256)
+          handler: handleAccrueInterest
+        - event: Borrow(indexed address,indexed address,indexed address,uint256,uint256,uint256,uint256,uint256)
+          handler: handleBorrow
+        - event: Liquidate(indexed address,indexed address,indexed address,uint256,uint256,uint256,uint256,uint256)
+          handler: handleLiquidate
+        - event: CalculateKinkBorrowRate(uint256)
+          handler: handleCalculateKinkBorrowRate
+        - event: CalculateBorrowRate(uint256)
+          handler: handleCalculateBorrowRate
+        - event: NewReserveFactor(uint256)
+          handler: handleNewReserveFactor
+        - event: NewKinkUtilizationRate(uint256)
+          handler: handleNewKinkUtilizationRate
+        - event: NewBorrowTracker(address)
+          handler: handleNewBorrowTracker
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+  - kind: ethereum/contract
+    name: FarmingPool
+    network: {{network}}
+    source:
+      abi: FarmingPool
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/farmingPool.ts
+      entities:
+        - FarmingPool
+      abis:
+        - name: FarmingPool
+          file: ./abis/FarmingPool.json
+        - name: Distributor
+          file: ./abis/Distributor.json
+      eventHandlers:
+        - event: Advance(uint256,uint256)
+          handler: handleAdvance
+  - kind: ethereum/contract
+    name: VaultToken
+    network: {{network}}
+    source:
+      abi: VaultToken
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/uniswapPair.ts
+      entities:
+        - Pair
+      abis:
+        - name: VaultToken
+          file: ./abis/VaultToken.json
+        - name: Pair
+          file: ./abis/Pair.json
+        - name: UniswapFactory
+          file: ./abis/UniswapFactory.json
+        - name: UniswapRouter
+          file: ./abis/UniswapRouter.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: ERC20SymbolBytes
+          file: ./abis/ERC20SymbolBytes.json
+        - name: ERC20NameBytes
+          file: ./abis/ERC20NameBytes.json
+        - name: PoolToken
+          file: ./abis/PoolToken.json
+      eventHandlers:
+        - event: Sync(uint256)
+          handler: handleSync2

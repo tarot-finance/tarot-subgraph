@@ -1,0 +1,163 @@
+type TarotFactory @entity {
+  # tarotFactory address
+  id: ID!
+
+  # derived liquidity
+  totalBalanceUSD: BigDecimal!
+  totalSupplyUSD: BigDecimal!
+  totalBorrowsUSD: BigDecimal!
+}
+
+type Token @entity {
+  # token address
+  id: ID!
+
+  # mirrored from the smart contract
+  symbol: String!
+  name: String!
+  decimals: BigInt!
+
+  # derived prices
+  derivedETH: BigDecimal!
+  derivedUSD: BigDecimal!
+}
+
+type Pair @entity {
+  # uniswap pair address
+  id: ID!
+
+  # mirrored from the smart contract
+  token0: Token!
+  token1: Token!
+  reserve0: BigDecimal!
+  reserve1: BigDecimal!
+  totalSupply: BigDecimal!
+
+  # derived liquidity
+  reserveETH: BigDecimal!
+  reserveUSD: BigDecimal!
+  # Price in terms of the asset pair
+  token0Price: BigDecimal!
+  token1Price: BigDecimal!
+  # derived prices
+  derivedETH: BigDecimal!
+  derivedUSD: BigDecimal!
+
+  syncCount: BigInt!
+
+  # vault token
+  isVaultToken: Boolean!
+}
+
+type Collateral @entity {
+  # address
+  id: ID!
+
+  # mirrored from the smart contract
+  underlying: Pair!
+  totalBalance: BigDecimal!
+  safetyMargin: BigDecimal!
+  liquidationIncentive: BigDecimal!
+  exchangeRate: BigDecimal!
+
+  # derived liquidity
+  totalBalanceUSD: BigDecimal!
+
+  lendingPool: LendingPool!
+}
+
+type Borrowable @entity {
+  # address
+  id: ID!
+
+  # mirrored from the smart contract
+  underlying: Token!
+  totalBalance: BigDecimal!
+  totalBorrows: BigDecimal!
+  borrowRate: BigDecimal!
+  reserveFactor: BigDecimal!
+  kinkBorrowRate: BigDecimal!
+  kinkUtilizationRate: BigDecimal!
+  borrowIndex: BigDecimal!
+  accrualTimestamp: BigInt!
+  exchangeRate: BigDecimal!
+
+  # derived liquidity
+  totalBalanceUSD: BigDecimal!
+  totalSupplyUSD: BigDecimal!
+  totalBorrowsUSD: BigDecimal!
+
+  # derived APR
+  # borrowAPR: BigDecimal!
+  # supplyAPR: BigDecimal!
+  # farmingAPR: BigDecimal!
+
+  lendingPool: LendingPool!
+  farmingPool: FarmingPool
+}
+
+type LendingPool @entity {
+  id: ID!
+
+  pair: Pair!
+  collateral: Collateral!
+  borrowable0: Borrowable!
+  borrowable1: Borrowable!
+
+  # derived liquidity
+  totalBalanceUSD: BigDecimal!
+  totalSupplyUSD: BigDecimal!
+  totalBorrowsUSD: BigDecimal!
+}
+
+type Distributor @entity {
+  # address
+  id: ID!
+
+  # TODO add reward speed
+}
+
+type FarmingPool @entity {
+  # address
+  id: ID!
+
+  # mirrored from the smart contract
+  borrowable: Borrowable!
+  distributor: Distributor!
+  epochAmount: BigDecimal!
+  epochBegin: BigInt!
+  segmentLength: BigInt!
+  vestingBegin: BigInt!
+  sharePercentage: BigDecimal!
+}
+
+### USER
+
+type User @entity {
+  id: ID!
+  collateralPositions: [CollateralPosition!] @derivedFrom(field: "user")
+  supplyPositions: [SupplyPosition!] @derivedFrom(field: "user")
+  borrowPositions: [BorrowPosition!] @derivedFrom(field: "user")
+}
+
+type CollateralPosition @entity {
+  id: ID!
+  user: User!
+  collateral: Collateral!
+  balance: BigDecimal!
+}
+
+type SupplyPosition @entity {
+  id: ID!
+  user: User!
+  borrowable: Borrowable!
+  balance: BigDecimal!
+}
+
+type BorrowPosition @entity {
+  id: ID!
+  user: User!
+  borrowable: Borrowable!
+  borrowBalance: BigDecimal!
+  borrowIndex: BigDecimal!
+}

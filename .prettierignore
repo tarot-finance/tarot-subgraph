@@ -7,3 +7,4 @@ yarn-error.log
 .env.example
 scratch
 node_modules/
+*.yaml
