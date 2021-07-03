@@ -239,6 +239,7 @@ export function loadOrCreatePair(pairAddress: Address): Pair {
     pair.derivedUSD = ZERO_BD;
     pair.syncCount = ZERO_BI;
     pair.isVaultToken = false;
+    pair.uniswapV2PairAddress = pairAddress.toHexString();
 
     PairTemplate.create(pairAddress);
 
@@ -247,6 +248,7 @@ export function loadOrCreatePair(pairAddress: Address): Pair {
     let isVaultTokenCallResult = vaultTokenContract.try_isVaultToken();
     if (!isVaultTokenCallResult.reverted && isVaultTokenCallResult.value) {
       pair.isVaultToken = true;
+      pair.uniswapV2PairAddress = vaultTokenContract.underlying().toHexString();
     }
   }
   pair.save();
