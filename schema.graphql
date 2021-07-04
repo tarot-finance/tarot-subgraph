@@ -48,6 +48,7 @@ type Pair @entity {
   # vault token
   isVaultToken: Boolean!
   uniswapV2PairAddress: String!
+  rewardsToken: Token
 }
 
 type Collateral @entity {

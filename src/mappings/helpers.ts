@@ -249,6 +249,11 @@ export function loadOrCreatePair(pairAddress: Address): Pair {
     if (!isVaultTokenCallResult.reverted && isVaultTokenCallResult.value) {
       pair.isVaultToken = true;
       pair.uniswapV2PairAddress = vaultTokenContract.underlying().toHexString();
+      let rewardsTokenAddress = vaultTokenContract.rewardsToken();
+
+      loadOrCreateToken(rewardsTokenAddress);
+
+      pair.rewardsToken = rewardsTokenAddress.toHexString();
     }
   }
   pair.save();
