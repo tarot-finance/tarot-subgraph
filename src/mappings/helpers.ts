@@ -254,6 +254,9 @@ export function loadOrCreatePair(pairAddress: Address): Pair {
       loadOrCreateToken(rewardsTokenAddress);
 
       pair.rewardsToken = rewardsTokenAddress.toHexString();
+
+      // load or create actual pair
+      loadOrCreatePair(vaultTokenContract.underlying());
     }
   }
   pair.save();
