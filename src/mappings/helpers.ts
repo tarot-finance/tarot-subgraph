@@ -22,7 +22,10 @@ import { Distributor as DistributorContract } from "../types/TarotFactory/Distri
 import { Collateral as CollateralContract } from "../types/TarotFactory/Collateral";
 import { Borrowable as BorrowableContract } from "../types/TarotFactory/Borrowable";
 import { VaultToken as VaultTokenContract } from "../types/TarotFactory/VaultToken";
-import { Pair as PairTemplate } from "../types/templates";
+import {
+  VaultToken as VaultTokenTemplate,
+  Pair as PairTemplate
+} from "../types/templates";
 
 export const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
 
@@ -247,6 +250,7 @@ export function loadOrCreatePair(pairAddress: Address): Pair {
     let vaultTokenContract = VaultTokenContract.bind(pairAddress);
     let isVaultTokenCallResult = vaultTokenContract.try_isVaultToken();
     if (!isVaultTokenCallResult.reverted && isVaultTokenCallResult.value) {
+      VaultTokenTemplate.create(pairAddress);
       pair.isVaultToken = true;
       pair.uniswapV2PairAddress = vaultTokenContract.underlying().toHexString();
       let rewardsTokenAddress = vaultTokenContract.rewardsToken();
@@ -256,7 +260,7 @@ export function loadOrCreatePair(pairAddress: Address): Pair {
       pair.rewardsToken = rewardsTokenAddress.toHexString();
 
       // load or create actual pair
-      loadOrCreatePair(vaultTokenContract.underlying());
+      //loadOrCreatePair(vaultTokenContract.underlying());
     }
   }
   pair.save();

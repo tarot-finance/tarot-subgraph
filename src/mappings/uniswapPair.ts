@@ -11,9 +11,18 @@ import {
   Sync as Sync2
 } from "../types/templates/VaultToken/VaultToken";
 import { getEthPriceInUSD, findEthPerToken } from "./pricing";
-import { convertTokenToDecimal, ONE_BI, ZERO_BD, BI_18 } from "./helpers";
+import {
+  convertTokenToDecimal,
+  ONE_BI,
+  ZERO_BD,
+  BI_18,
+  ZERO_BI
+} from "./helpers";
 
 export function handleSync1(event: Sync1): void {
+  if (event.block.number.lt(BigInt.fromI32(12000000))) {
+    return;
+  }
   let pair = Pair.load(event.address.toHex()) as Pair;
   let pairContract = PairContract.bind(event.address);
   let uniswapFactoryAddress = pairContract.factory();
@@ -30,21 +39,24 @@ export function handleSync1(event: Sync1): void {
 }
 
 export function handleSync2(event: Sync2): void {
+  if (event.block.number.lt(BigInt.fromI32(12000000))) {
+    return;
+  }
   let pair = Pair.load(event.address.toHex()) as Pair;
   let vaultTokenContract = VaultTokenContract.bind(event.address);
   let uniswapRouterAddress = vaultTokenContract.router();
   let uniswapRouter = UniswapRouterContract.bind(uniswapRouterAddress);
   let uniswapFactoryAddress = uniswapRouter.factory();
   let uniswapFactory = UniswapFactoryContract.bind(uniswapFactoryAddress);
-  let reserves = vaultTokenContract.getReserves();
+  let reserve0 = ZERO_BI;
+  let reserve1 = ZERO_BI;
+  let reservesResult = vaultTokenContract.try_getReserves();
+  if (!reservesResult.reverted) {
+    reserve0 = reservesResult.value.value0;
+    reserve1 = reservesResult.value.value1;
+  }
   let totalSupply = vaultTokenContract.totalSupply();
-  _handleSync(
-    uniswapFactory,
-    pair,
-    reserves.value0,
-    reserves.value1,
-    totalSupply
-  );
+  _handleSync(uniswapFactory, pair, reserve0, reserve1, totalSupply);
 }
 
 function _handleSync(
@@ -58,6 +70,19 @@ function _handleSync(
 
   let token0 = Token.load(pair.token0);
   let token1 = Token.load(pair.token1);
+
+  // faster sync
+  //pair.save();
+  /*
+  if (
+    (pair.syncCount as i32) % 500 !== 1 &&
+    token0.derivedUSD.notEqual(ZERO_BD) &&
+    token1.derivedUSD.notEqual(ZERO_BD) &&
+    pair.derivedUSD.notEqual(ZERO_BD) &&
+    pair.totalSupply.notEqual(ZERO_BD)
+  )
+    return;
+  */
 
   pair.reserve0 = convertTokenToDecimal(reserve0, token0.decimals);
   pair.reserve1 = convertTokenToDecimal(reserve1, token1.decimals);
@@ -92,11 +117,18 @@ function _handleSync(
   pair.save();
 
   // update LP price
-  pair.derivedETH = pair.reserveETH.div(pair.totalSupply);
-  pair.derivedUSD = pair.reserveUSD.div(pair.totalSupply);
+  if (pair.totalSupply.notEqual(ZERO_BD))
+    pair.derivedETH = pair.reserveETH.div(pair.totalSupply);
+  else pair.derivedETH = ZERO_BD;
+  if (pair.totalSupply.notEqual(ZERO_BD))
+    pair.derivedUSD = pair.reserveUSD.div(pair.totalSupply);
+  else pair.derivedUSD = ZERO_BD;
 
   // save entities
   pair.save();
   token0.save();
   token1.save();
+
+  // update lendingPool usd values
+  //updateLendingPoolUSD(pair.id);
 }
