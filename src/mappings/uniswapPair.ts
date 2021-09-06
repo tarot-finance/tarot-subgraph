@@ -24,22 +24,6 @@ export function handleSync1(event: Sync1): void {
     return;
   }
   let pair = Pair.load(event.address.toHex()) as Pair;
-  pair.syncCount = pair.syncCount.plus(ONE_BI);
-
-  let token0 = Token.load(pair.token0);
-  let token1 = Token.load(pair.token1);
-  // faster sync
-  pair.save();
-
-  if (
-    (pair.syncCount as i32) % 100 !== 1 &&
-    token0.derivedUSD.notEqual(ZERO_BD) &&
-    token1.derivedUSD.notEqual(ZERO_BD) &&
-    pair.derivedUSD.notEqual(ZERO_BD) &&
-    pair.totalSupply.notEqual(ZERO_BD)
-  )
-    return;
-
   let pairContract = PairContract.bind(event.address);
   let uniswapFactoryAddress = pairContract.factory();
   let uniswapFactory = UniswapFactoryContract.bind(uniswapFactoryAddress);
@@ -59,22 +43,6 @@ export function handleSync2(event: Sync2): void {
     return;
   }
   let pair = Pair.load(event.address.toHex()) as Pair;
-  pair.syncCount = pair.syncCount.plus(ONE_BI);
-
-  let token0 = Token.load(pair.token0);
-  let token1 = Token.load(pair.token1);
-  // faster sync
-  pair.save();
-
-  if (
-    (pair.syncCount as i32) % 100 !== 1 &&
-    token0.derivedUSD.notEqual(ZERO_BD) &&
-    token1.derivedUSD.notEqual(ZERO_BD) &&
-    pair.derivedUSD.notEqual(ZERO_BD) &&
-    pair.totalSupply.notEqual(ZERO_BD)
-  )
-    return;
-
   let vaultTokenContract = VaultTokenContract.bind(event.address);
   let uniswapRouterAddress = vaultTokenContract.router();
   let uniswapRouter = UniswapRouterContract.bind(uniswapRouterAddress);
@@ -98,10 +66,23 @@ function _handleSync(
   reserve1: BigInt,
   totalSupply: BigInt
 ): void {
-  //pair.syncCount = pair.syncCount.plus(ONE_BI);
+  pair.syncCount = pair.syncCount.plus(ONE_BI);
 
   let token0 = Token.load(pair.token0);
   let token1 = Token.load(pair.token1);
+
+  // faster sync
+  //pair.save();
+  /*
+  if (
+    (pair.syncCount as i32) % 500 !== 1 &&
+    token0.derivedUSD.notEqual(ZERO_BD) &&
+    token1.derivedUSD.notEqual(ZERO_BD) &&
+    pair.derivedUSD.notEqual(ZERO_BD) &&
+    pair.totalSupply.notEqual(ZERO_BD)
+  )
+    return;
+  */
 
   pair.reserve0 = convertTokenToDecimal(reserve0, token0.decimals);
   pair.reserve1 = convertTokenToDecimal(reserve1, token1.decimals);
