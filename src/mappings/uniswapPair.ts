@@ -32,7 +32,7 @@ export function handleSync1(event: Sync1): void {
   pair.save();
 
   if (
-    (pair.syncCount as i32) % 10 !== 1 &&
+    (pair.syncCount as i32) % 100 !== 1 &&
     token0.derivedUSD.notEqual(ZERO_BD) &&
     token1.derivedUSD.notEqual(ZERO_BD) &&
     pair.derivedUSD.notEqual(ZERO_BD) &&
@@ -67,7 +67,7 @@ export function handleSync2(event: Sync2): void {
   pair.save();
 
   if (
-    (pair.syncCount as i32) % 10 !== 1 &&
+    (pair.syncCount as i32) % 100 !== 1 &&
     token0.derivedUSD.notEqual(ZERO_BD) &&
     token1.derivedUSD.notEqual(ZERO_BD) &&
     pair.derivedUSD.notEqual(ZERO_BD) &&
